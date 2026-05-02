@@ -3,63 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel | Category Control</title>
+    <title>Sona-Moni Admin | Premium Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { background: #0f172a; color: white; font-family: 'Hind Siliguri', sans-serif; }
-        .card { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 15px; }
-        input, select { background: #1e293b !important; border: 1px solid #334155 !important; color: white !important; }
+        body { font-family: 'Hind Siliguri', sans-serif; background: #0f172a; color: white; overflow-x: hidden; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; }
+        .input-box { background: rgba(15, 23, 42, 0.8) !important; border: 1px solid #334155 !important; color: white !important; }
+        .section-card { cursor: pointer; transition: 0.3s; }
+        .section-card:hover { background: rgba(59, 130, 246, 0.1); transform: translateY(-5px); }
+        .hidden-section { display: none; }
+        .active-section { display: block; animation: slideIn 0.4s ease-out; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
     </style>
 </head>
-<body class="p-4 md:p-10">
+<body class="p-4 md:p-8">
 
-    <div id="dashboard" class="max-w-5xl mx-auto">
-        <h1 class="text-3xl font-bold text-blue-400 mb-8">Admin Dashboard</h1>
+    <div id="loginPage" class="fixed inset-0 z-[200] bg-[#0f172a] flex items-center justify-center p-6">
+        <div class="glass p-8 w-full max-w-sm text-center">
+            <img src="https://i.ibb.co.com/GvdnCgqr/file-00000000518471faaeda9a603c264fec.png" class="w-16 h-16 mx-auto mb-4 rounded-full">
+            <h2 class="text-xl font-bold mb-6">Admin Access</h2>
+            <input type="password" id="adminPass" placeholder="পাসওয়ার্ড দিন" class="w-full input-box p-4 rounded-xl outline-none mb-4 text-center">
+            <button onclick="checkLogin()" class="w-full bg-blue-600 py-3 rounded-xl font-bold shadow-lg">লগইন করুন</button>
+        </div>
+    </div>
+
+    <div id="mainDashboard" class="hidden max-w-6xl mx-auto">
         
-        <div class="card p-6 mb-10 border-blue-500/30">
-            <h3 class="font-bold mb-4 text-blue-400">Manage Categories (ক্যাটাগরি ম্যানেজমেন্ট)</h3>
-            <div class="flex gap-2 mb-4">
-                <input type="text" id="newCatName" placeholder="New Category Name" class="flex-1 p-3 rounded-lg outline-none">
-                <button onclick="addCategory()" class="bg-blue-600 px-6 py-3 rounded-lg font-bold">Add Category</button>
+        <header class="flex justify-between items-center mb-10">
+            <div>
+                <h1 class="text-2xl font-bold text-blue-400">SONA-MONI Admin</h1>
+                <p class="text-xs opacity-50">Welcome back, Manager</p>
             </div>
-            <div id="catChips" class="flex flex-wrap gap-2">
+            <button onclick="location.reload()" class="bg-red-500/20 text-red-400 px-4 py-2 rounded-lg text-sm">Logout</button>
+        </header>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+            <div class="glass p-5 border-l-4 border-blue-500">
+                <p class="text-[10px] uppercase opacity-50">Total Orders</p>
+                <h3 id="statTotalOrders" class="text-2xl font-bold">0</h3>
+            </div>
+            <div class="glass p-5 border-l-4 border-green-500">
+                <p class="text-[10px] uppercase opacity-50">Total Sales</p>
+                <h3 id="statTotalSales" class="text-2xl font-bold">৳0</h3>
+            </div>
+            <div class="glass p-5 border-l-4 border-purple-500">
+                <p class="text-[10px] uppercase opacity-50">Today Income</p>
+                <h3 id="statTodayIncome" class="text-2xl font-bold">৳0</h3>
+            </div>
+            <div class="glass p-5 border-l-4 border-orange-500">
+                <p class="text-[10px] uppercase opacity-50">Products</p>
+                <h3 id="statTotalProducts" class="text-2xl font-bold">0</h3>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-10">
+            <div onclick="showSection('incomeSection')" class="glass p-6 section-card text-center">📊 সেলস রিপোর্ট</div>
+            <div onclick="showSection('productSection')" class="glass p-6 section-card text-center">📦 প্রোডাক্ট ম্যানেজ</div>
+            <div onclick="showSection('bannerSection')" class="glass p-6 section-card text-center">🖼️ ব্যানার আপডেট</div>
+            <div onclick="showSection('catSection')" class="glass p-6 section-card text-center">📁 ক্যাটাগরি</div>
+        </div>
+
+        <hr class="opacity-10 mb-10">
+
+        <div id="incomeSection" class="hidden-section glass p-6">
+            <h2 class="text-xl font-bold mb-6 text-blue-400 flex items-center gap-2"><span>📊</span> বিস্তারিত রিপোর্ট</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-4">
+                    <div class="flex justify-between p-4 bg-white/5 rounded-xl"><span>আজকের অর্ডার:</span> <b id="repTodayOrders">0</b></div>
+                    <div class="flex justify-between p-4 bg-white/5 rounded-xl"><span>আজকের ইনকাম:</span> <b id="repTodayIncome">৳0</b></div>
+                    <div class="flex justify-between p-4 bg-white/5 rounded-xl"><span>গত ৭ দিন (অর্ডার):</span> <b id="rep7DayOrders">0</b></div>
+                    <div class="flex justify-between p-4 bg-white/5 rounded-xl"><span>গত ৭ দিন (ইনকাম):</span> <b id="rep7DayIncome">৳0</b></div>
                 </div>
-        </div>
-
-        <div class="card p-6 mb-10">
-            <h3 id="formTitle" class="font-bold mb-4">Add/Edit Product</h3>
-            <input type="hidden" id="editId">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input type="text" id="pName" placeholder="Product Name" class="p-3 rounded-lg outline-none">
-                <select id="pCategory" class="p-3 rounded-lg outline-none">
-                    <option value="">Select Category</option>
-                </select>
-                <input type="text" id="pImg" placeholder="Image URL" class="p-3 rounded-lg outline-none">
-                <input type="number" id="pPrice" placeholder="Price" class="p-3 rounded-lg outline-none">
-                <input type="number" id="pOldPrice" placeholder="Old Price" class="p-3 rounded-lg outline-none">
+                <div class="space-y-4">
+                    <div class="flex justify-between p-4 bg-white/5 rounded-xl"><span>এই মাসে (অর্ডার):</span> <b id="repMonthOrders">0</b></div>
+                    <div class="flex justify-between p-4 bg-white/5 rounded-xl"><span>এই মাসে (ইনকাম):</span> <b id="repMonthIncome">৳0</b></div>
+                    <div class="flex justify-between p-4 bg-blue-600/20 rounded-xl"><span>সর্বমোট সেল:</span> <b id="repTotalSales">৳0</b></div>
+                </div>
             </div>
-            <button onclick="saveProduct()" id="saveBtn" class="w-full bg-green-600 mt-4 py-3 rounded-lg font-bold">Save Product</button>
         </div>
 
-        <div class="card overflow-x-auto">
-            <table class="w-full text-left">
-                <thead class="bg-slate-800">
-                    <tr>
-                        <th class="p-4">Image</th>
-                        <th class="p-4">Name</th>
-                        <th class="p-4">Category</th>
-                        <th class="p-4">Price</th>
-                        <th class="p-4">Action</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody"></tbody>
-            </table>
+        <div id="productSection" class="hidden-section">
+            <div class="glass p-6 mb-6">
+                <h2 class="font-bold mb-4">অ্যাড/এডিট প্রোডাক্ট</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <input type="text" id="pName" placeholder="Product Name" class="input-box p-3 rounded-lg outline-none">
+                    <select id="pCat" class="input-box p-3 rounded-lg outline-none"><option value="">ক্যাটাগরি সিলেক্ট করুন</option></select>
+                    <input type="text" id="pImg" placeholder="Image URL" class="input-box p-3 rounded-lg outline-none">
+                    <input type="number" id="pPrice" placeholder="Selling Price" class="input-box p-3 rounded-lg outline-none">
+                    <input type="number" id="pOldPrice" placeholder="Old Price (Optional)" class="input-box p-3 rounded-lg outline-none">
+                    <button onclick="saveProduct()" class="bg-green-600 font-bold rounded-lg py-3">সেভ প্রোডাক্ট</button>
+                </div>
+            </div>
+            <div class="glass overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead class="bg-blue-600/10"><tr><th class="p-4">Product</th><th class="p-4">Category</th><th class="p-4">Price</th><th class="p-4">Action</th></tr></thead>
+                    <tbody id="productTable"></tbody>
+                </table>
+            </div>
         </div>
+
+        <div id="bannerSection" class="hidden-section glass p-6">
+            <h2 class="font-bold mb-4">ব্যানার ম্যানেজমেন্ট</h2>
+            <div class="flex gap-4 mb-6">
+                <input type="text" id="bannerUrl" placeholder="নতুন ব্যানার ইমেজ লিঙ্ক (Direct URL)" class="flex-1 input-box p-3 rounded-lg outline-none">
+                <button onclick="addBanner()" class="bg-blue-600 px-6 rounded-lg font-bold">Add</button>
+            </div>
+            <div id="bannerList" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+        </div>
+
+        <div id="catSection" class="hidden-section glass p-6">
+            <h2 class="font-bold mb-4">ক্যাটাগরি লিস্ট</h2>
+            <div class="flex gap-4 mb-6">
+                <input type="text" id="newCat" placeholder="নতুন ক্যাটাগরি নাম" class="flex-1 input-box p-3 rounded-lg outline-none">
+                <button onclick="addCategory()" class="bg-purple-600 px-6 rounded-lg font-bold">Create</button>
+            </div>
+            <div id="catList" class="flex flex-wrap gap-3"></div>
+        </div>
+
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDo1jmjdEne0Vdx7i0Ospot38wLv9Zz4oo",
@@ -72,75 +138,144 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        let currentProducts = [];
 
-        // Category Logic
-        window.addCategory = async () => {
-            const name = document.getElementById('newCatName').value;
-            if(!name) return;
-            await addDoc(collection(db, "categories"), { name });
-            document.getElementById('newCatName').value = '';
+        // --- Auth ---
+        window.checkLogin = () => {
+            if(document.getElementById('adminPass').value === '7324') {
+                document.getElementById('loginPage').style.display = 'none';
+                document.getElementById('mainDashboard').classList.remove('hidden');
+                loadStats();
+            } else { alert('ভুল পাসওয়ার্ড!'); }
         };
 
-        onSnapshot(collection(db, "categories"), (snap) => {
-            const chips = document.getElementById('catChips');
-            const select = document.getElementById('pCategory');
-            chips.innerHTML = '';
-            select.innerHTML = '<option value="">Select Category</option>';
-            snap.forEach(d => {
-                const cat = d.data().name;
-                chips.innerHTML += `<span class="bg-slate-700 px-3 py-1 rounded-full text-xs flex items-center gap-2">${cat} <button onclick="delCat('${d.id}')" class="text-red-400 font-bold">×</button></span>`;
-                select.innerHTML += `<option value="${cat}">${cat}</option>`;
+        // --- Navigation ---
+        window.showSection = (id) => {
+            document.querySelectorAll('.hidden-section').forEach(s => s.classList.remove('active-section'));
+            document.getElementById(id).classList.add('active-section');
+        };
+
+        // --- 1. Reports & Stats Logic ---
+        function loadStats() {
+            onSnapshot(collection(db, "orders"), (snap) => {
+                let totalIncome = 0;
+                let todayIncome = 0;
+                let last7DaysIncome = 0;
+                let lastMonthIncome = 0;
+                
+                let totalOrders = snap.size;
+                let todayOrders = 0;
+                let last7DaysOrders = 0;
+                let lastMonthOrders = 0;
+
+                const now = new Date();
+                const todayStr = now.toLocaleDateString();
+                const sevenDaysAgo = new Date(now.setDate(now.getDate() - 7));
+                const lastMonth = new Date(now.setMonth(now.getMonth() - 1));
+
+                snap.forEach(d => {
+                    const o = d.data();
+                    const orderPrice = Number(o.price) || 0;
+                    const orderDate = o.timestamp ? new Date(o.timestamp.seconds * 1000) : new Date();
+
+                    totalIncome += orderPrice;
+
+                    if(orderDate.toLocaleDateString() === todayStr) {
+                        todayIncome += orderPrice;
+                        todayOrders++;
+                    }
+                    if(orderDate > sevenDaysAgo) {
+                        last7DaysIncome += orderPrice;
+                        last7DaysOrders++;
+                    }
+                    if(orderDate > lastMonth) {
+                        lastMonthIncome += orderPrice;
+                        lastMonthOrders++;
+                    }
+                });
+
+                // Update UI
+                document.getElementById('statTotalOrders').innerText = totalOrders;
+                document.getElementById('statTotalSales').innerText = "৳" + totalIncome;
+                document.getElementById('statTodayIncome').innerText = "৳" + todayIncome;
+                
+                document.getElementById('repTodayOrders').innerText = todayOrders;
+                document.getElementById('repTodayIncome').innerText = "৳" + todayIncome;
+                document.getElementById('rep7DayOrders').innerText = last7DaysOrders;
+                document.getElementById('rep7DayIncome').innerText = "৳" + last7DaysIncome;
+                document.getElementById('repMonthOrders').innerText = lastMonthOrders;
+                document.getElementById('repMonthIncome').innerText = "৳" + lastMonthIncome;
+                document.getElementById('repTotalSales').innerText = "৳" + totalIncome;
             });
-        });
+        }
 
-        window.delCat = async (id) => { if(confirm("Delete Category?")) await deleteDoc(doc(db, "categories", id)); };
-
-        // Product Logic
+        // --- 2. Product Logic ---
         onSnapshot(collection(db, "products"), (snap) => {
-            const body = document.getElementById('tableBody');
-            body.innerHTML = ''; currentProducts = [];
+            const table = document.getElementById('productTable');
+            table.innerHTML = '';
+            document.getElementById('statTotalProducts').innerText = snap.size;
             snap.forEach(d => {
-                const p = d.data(); currentProducts.push({id: d.id, ...p});
-                body.innerHTML += `<tr class="border-t border-slate-800">
-                    <td class="p-4"><img src="${p.img}" class="w-10 h-10 rounded"></td>
-                    <td class="p-4 font-bold">${p.name}</td>
-                    <td class="p-4"><span class="bg-blue-900/50 text-blue-300 px-2 py-1 rounded text-xs">${p.category || 'N/A'}</span></td>
+                const p = d.data();
+                table.innerHTML += `<tr class="border-b border-white/5">
+                    <td class="p-4"><img src="${p.img}" class="w-8 h-8 rounded inline mr-2">${p.name}</td>
+                    <td class="p-4"><span class="text-xs bg-slate-700 px-2 py-1 rounded">${p.category}</span></td>
                     <td class="p-4">৳${p.price}</td>
-                    <td class="p-4 text-xs">
-                        <button onclick="editBtn('${d.id}')" class="text-blue-400 mr-2">Edit</button>
-                        <button onclick="delBtn('${d.id}')" class="text-red-400">Delete</button>
-                    </td>
+                    <td class="p-4"><button onclick="deleteDoc(doc(db, 'products', '${d.id}'))" class="text-red-400">Delete</button></td>
                 </tr>`;
             });
         });
 
         window.saveProduct = async () => {
-            const id = document.getElementById('editId').value;
             const data = {
                 name: document.getElementById('pName').value,
-                category: document.getElementById('pCategory').value,
+                category: document.getElementById('pCat').value,
                 img: document.getElementById('pImg').value,
                 price: Number(document.getElementById('pPrice').value),
                 oldPrice: Number(document.getElementById('pOldPrice').value) || 0
             };
-            if(!data.name || !data.category) return alert("নাম এবং ক্যাটাগরি দিন!");
-            if(id) await updateDoc(doc(db, "products", id), data);
-            else await addDoc(collection(db, "products"), data);
-            location.reload();
+            if(!data.name || !data.category) return alert("Fill data");
+            await addDoc(collection(db, "products"), data);
+            alert("Product Added!");
         };
 
-        window.delBtn = async (id) => { if(confirm("Delete?")) await deleteDoc(doc(db, "products", id)); };
-        window.editBtn = (id) => {
-            const p = currentProducts.find(x => x.id === id);
-            document.getElementById('editId').value = id;
-            document.getElementById('pName').value = p.name;
-            document.getElementById('pCategory').value = p.category;
-            document.getElementById('pImg').value = p.img;
-            document.getElementById('pPrice').value = p.price;
-            document.getElementById('pOldPrice').value = p.oldPrice;
-            document.getElementById('formTitle').innerText = "Edit Product";
+        // --- 3. Banner Logic ---
+        onSnapshot(collection(db, "banners"), (snap) => {
+            const list = document.getElementById('bannerList');
+            list.innerHTML = '';
+            snap.forEach(d => {
+                list.innerHTML += `<div class="relative group">
+                    <img src="${d.data().url}" class="h-24 w-full object-cover rounded-lg">
+                    <button onclick="deleteDoc(doc(db, 'banners', '${d.id}'))" class="absolute top-1 right-1 bg-red-600 p-1 rounded text-[10px]">Delete</button>
+                </div>`;
+            });
+        });
+
+        window.addBanner = async () => {
+            const url = document.getElementById('bannerUrl').value;
+            if(!url) return;
+            await addDoc(collection(db, "banners"), { url });
+            document.getElementById('bannerUrl').value = '';
         };
+
+        // --- 4. Category Logic ---
+        onSnapshot(collection(db, "categories"), (snap) => {
+            const list = document.getElementById('catList');
+            const select = document.getElementById('pCat');
+            list.innerHTML = '';
+            select.innerHTML = '<option value="">ক্যাটাগরি সিলেক্ট করুন</option>';
+            snap.forEach(d => {
+                const name = d.data().name;
+                list.innerHTML += `<span class="bg-white/10 px-4 py-2 rounded-xl flex items-center gap-2">${name} <button onclick="deleteDoc(doc(db, 'categories', '${d.id}'))" class="text-red-400">×</button></span>`;
+                select.innerHTML += `<option value="${name}">${name}</option>`;
+            });
+        });
+
+        window.addCategory = async () => {
+            const name = document.getElementById('newCat').value;
+            if(!name) return;
+            await addDoc(collection(db, "categories"), { name });
+            document.getElementById('newCat').value = '';
+        };
+
     </script>
 </body>
 </html>
