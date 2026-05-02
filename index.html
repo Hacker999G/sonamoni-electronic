@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel | Category Control</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #0f172a; color: white; font-family: 'Hind Siliguri', sans-serif; }
+        .card { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 15px; }
+        input, select { background: #1e293b !important; border: 1px solid #334155 !important; color: white !important; }
+    </style>
+</head>
+<body class="p-4 md:p-10">
+
+    <div id="dashboard" class="max-w-5xl mx-auto">
+        <h1 class="text-3xl font-bold text-blue-400 mb-8">Admin Dashboard</h1>
+        
+        <div class="card p-6 mb-10 border-blue-500/30">
+            <h3 class="font-bold mb-4 text-blue-400">Manage Categories (ক্যাটাগরি ম্যানেজমেন্ট)</h3>
+            <div class="flex gap-2 mb-4">
+                <input type="text" id="newCatName" placeholder="New Category Name" class="flex-1 p-3 rounded-lg outline-none">
+                <button onclick="addCategory()" class="bg-blue-600 px-6 py-3 rounded-lg font-bold">Add Category</button>
+            </div>
+            <div id="catChips" class="flex flex-wrap gap-2">
+                </div>
+        </div>
+
+        <div class="card p-6 mb-10">
+            <h3 id="formTitle" class="font-bold mb-4">Add/Edit Product</h3>
+            <input type="hidden" id="editId">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input type="text" id="pName" placeholder="Product Name" class="p-3 rounded-lg outline-none">
+                <select id="pCategory" class="p-3 rounded-lg outline-none">
+                    <option value="">Select Category</option>
+                </select>
+                <input type="text" id="pImg" placeholder="Image URL" class="p-3 rounded-lg outline-none">
+                <input type="number" id="pPrice" placeholder="Price" class="p-3 rounded-lg outline-none">
+                <input type="number" id="pOldPrice" placeholder="Old Price" class="p-3 rounded-lg outline-none">
+            </div>
+            <button onclick="saveProduct()" id="saveBtn" class="w-full bg-green-600 mt-4 py-3 rounded-lg font-bold">Save Product</button>
+        </div>
+
+        <div class="card overflow-x-auto">
+            <table class="w-full text-left">
+                <thead class="bg-slate-800">
+                    <tr>
+                        <th class="p-4">Image</th>
+                        <th class="p-4">Name</th>
+                        <th class="p-4">Category</th>
+                        <th class="p-4">Price</th>
+                        <th class="p-4">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDo1jmjdEne0Vdx7i0Ospot38wLv9Zz4oo",
+            authDomain: "sonamoni-b3c3d.firebaseapp.com",
+            projectId: "sonamoni-b3c3d",
+            storageBucket: "sonamoni-b3c3d.firebasestorage.app",
+            messagingSenderId: "1054792405512",
+            appId: "1:1054792405512:web:c4950897db2966b43eb7bd"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        let currentProducts = [];
+
+        // Category Logic
+        window.addCategory = async () => {
+            const name = document.getElementById('newCatName').value;
+            if(!name) return;
+            await addDoc(collection(db, "categories"), { name });
+            document.getElementById('newCatName').value = '';
+        };
+
+        onSnapshot(collection(db, "categories"), (snap) => {
+            const chips = document.getElementById('catChips');
+            const select = document.getElementById('pCategory');
+            chips.innerHTML = '';
+            select.innerHTML = '<option value="">Select Category</option>';
+            snap.forEach(d => {
+                const cat = d.data().name;
+                chips.innerHTML += `<span class="bg-slate-700 px-3 py-1 rounded-full text-xs flex items-center gap-2">${cat} <button onclick="delCat('${d.id}')" class="text-red-400 font-bold">×</button></span>`;
+                select.innerHTML += `<option value="${cat}">${cat}</option>`;
+            });
+        });
+
+        window.delCat = async (id) => { if(confirm("Delete Category?")) await deleteDoc(doc(db, "categories", id)); };
+
+        // Product Logic
+        onSnapshot(collection(db, "products"), (snap) => {
+            const body = document.getElementById('tableBody');
+            body.innerHTML = ''; currentProducts = [];
+            snap.forEach(d => {
+                const p = d.data(); currentProducts.push({id: d.id, ...p});
+                body.innerHTML += `<tr class="border-t border-slate-800">
+                    <td class="p-4"><img src="${p.img}" class="w-10 h-10 rounded"></td>
+                    <td class="p-4 font-bold">${p.name}</td>
+                    <td class="p-4"><span class="bg-blue-900/50 text-blue-300 px-2 py-1 rounded text-xs">${p.category || 'N/A'}</span></td>
+                    <td class="p-4">৳${p.price}</td>
+                    <td class="p-4 text-xs">
+                        <button onclick="editBtn('${d.id}')" class="text-blue-400 mr-2">Edit</button>
+                        <button onclick="delBtn('${d.id}')" class="text-red-400">Delete</button>
+                    </td>
+                </tr>`;
+            });
+        });
+
+        window.saveProduct = async () => {
+            const id = document.getElementById('editId').value;
+            const data = {
+                name: document.getElementById('pName').value,
+                category: document.getElementById('pCategory').value,
+                img: document.getElementById('pImg').value,
+                price: Number(document.getElementById('pPrice').value),
+                oldPrice: Number(document.getElementById('pOldPrice').value) || 0
+            };
+            if(!data.name || !data.category) return alert("নাম এবং ক্যাটাগরি দিন!");
+            if(id) await updateDoc(doc(db, "products", id), data);
+            else await addDoc(collection(db, "products"), data);
+            location.reload();
+        };
+
+        window.delBtn = async (id) => { if(confirm("Delete?")) await deleteDoc(doc(db, "products", id)); };
+        window.editBtn = (id) => {
+            const p = currentProducts.find(x => x.id === id);
+            document.getElementById('editId').value = id;
+            document.getElementById('pName').value = p.name;
+            document.getElementById('pCategory').value = p.category;
+            document.getElementById('pImg').value = p.img;
+            document.getElementById('pPrice').value = p.price;
+            document.getElementById('pOldPrice').value = p.oldPrice;
+            document.getElementById('formTitle').innerText = "Edit Product";
+        };
+    </script>
+</body>
+</html>
