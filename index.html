@@ -5,128 +5,295 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sona-Moni Admin | Premium Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        body { font-family: 'Hind Siliguri', sans-serif; background: #0f172a; color: white; overflow-x: hidden; }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; }
-        .input-box { background: rgba(15, 23, 42, 0.8) !important; border: 1px solid #334155 !important; color: white !important; }
-        .section-card { cursor: pointer; transition: 0.3s; }
-        .section-card:hover { background: rgba(59, 130, 246, 0.1); transform: translateY(-5px); }
+        body { 
+            font-family: 'Hind Siliguri', sans-serif; 
+            background: #0f172a; /* Slate 900 */
+            color: #f8fafc; 
+            overflow-x: hidden; 
+        }
+        
+        /* Glassmorphism Effects */
+        .glass-panel { 
+            background: rgba(30, 41, 59, 0.7); 
+            backdrop-filter: blur(12px); 
+            border: 1px solid rgba(255, 255, 255, 0.05); 
+            border-radius: 16px; 
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Input Styling */
+        .input-premium { 
+            background: rgba(15, 23, 42, 0.6) !important; 
+            border: 1px solid #334155 !important; 
+            color: white !important; 
+            transition: all 0.3s ease;
+        }
+        .input-premium:focus {
+            border-color: #3b82f6 !important;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+
+        /* Sidebar Nav */
+        .nav-item { transition: 0.3s; cursor: pointer; border-left: 3px solid transparent; }
+        .nav-item:hover { background: rgba(59, 130, 246, 0.1); border-left-color: #3b82f6; }
+        .nav-item.active { background: linear-gradient(90deg, rgba(59, 130, 246, 0.2) 0%, transparent 100%); border-left-color: #3b82f6; color: #60a5fa; }
+
+        /* Sections */
         .hidden-section { display: none; }
-        .active-section { display: block; animation: slideIn 0.4s ease-out; }
-        @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        .active-section { display: block; animation: fadeIn 0.4s ease-out; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Toast Notification */
+        #toast {
+            visibility: hidden; min-width: 250px; background-color: #10b981; color: #fff;
+            text-align: center; border-radius: 8px; padding: 16px; position: fixed;
+            z-index: 1000; right: 20px; top: 20px; font-weight: 500;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); transition: 0.3s;
+            transform: translateX(100%); opacity: 0;
+        }
+        #toast.show { visibility: visible; transform: translateX(0); opacity: 1; }
+        #toast.error { background-color: #ef4444; }
     </style>
 </head>
-<body class="p-4 md:p-8">
+<body class="flex h-screen overflow-hidden">
 
-    <div id="loginPage" class="fixed inset-0 z-[200] bg-[#0f172a] flex items-center justify-center p-6">
-        <div class="glass p-8 w-full max-w-sm text-center">
-            <img src="https://i.ibb.co.com/GvdnCgqr/file-00000000518471faaeda9a603c264fec.png" class="w-16 h-16 mx-auto mb-4 rounded-full">
-            <h2 class="text-xl font-bold mb-6">Admin Access</h2>
-            <input type="password" id="adminPass" placeholder="পাসওয়ার্ড দিন" class="w-full input-box p-4 rounded-xl outline-none mb-4 text-center">
-            <button onclick="checkLogin()" class="w-full bg-blue-600 py-3 rounded-xl font-bold shadow-lg">লগইন করুন</button>
+    <!-- Toast Notification -->
+    <div id="toast"><i class="fas fa-check-circle mr-2"></i><span id="toast-msg">Success!</span></div>
+
+    <!-- 1. LOGIN PAGE -->
+    <div id="loginPage" class="fixed inset-0 z-[200] bg-[#0f172a] flex items-center justify-center p-6 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]">
+        <div class="glass-panel p-10 w-full max-w-md text-center relative overflow-hidden">
+            <div class="absolute -top-20 -right-20 w-40 h-40 bg-blue-500 rounded-full blur-3xl opacity-20"></div>
+            <img src="https://i.ibb.co.com/GvdnCgqr/file-00000000518471faaeda9a603c264fec.png" class="w-24 h-24 mx-auto mb-4 rounded-2xl shadow-xl shadow-blue-500/20 border border-white/10">
+            <h2 class="text-2xl font-bold mb-2">Sona-Moni Admin</h2>
+            <p class="text-slate-400 text-sm mb-8">Please enter your password to continue</p>
+            
+            <div class="relative mb-6">
+                <i class="fas fa-lock absolute left-4 top-4 text-slate-400"></i>
+                <input type="password" id="adminPass" placeholder="পাসওয়ার্ড দিন" class="w-full input-premium py-3 pl-12 pr-4 rounded-xl outline-none text-left">
+            </div>
+            
+            <button onclick="checkLogin()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 py-3.5 rounded-xl font-bold shadow-lg shadow-blue-500/30 transition-all">
+                লগইন করুন <i class="fas fa-arrow-right ml-2"></i>
+            </button>
         </div>
     </div>
 
-    <div id="mainDashboard" class="hidden max-w-6xl mx-auto">
+    <!-- 2. MAIN DASHBOARD -->
+    <div id="mainDashboard" class="hidden w-full flex h-full">
         
-        <header class="flex justify-between items-center mb-10">
+        <!-- Sidebar -->
+        <aside class="w-64 glass-panel border-y-0 border-l-0 rounded-none flex flex-col justify-between h-full z-10">
             <div>
-                <h1 class="text-2xl font-bold text-blue-400">SONA-MONI Admin</h1>
-                <p class="text-xs opacity-50">Welcome back, Manager</p>
-            </div>
-            <button onclick="location.reload()" class="bg-red-500/20 text-red-400 px-4 py-2 rounded-lg text-sm">Logout</button>
-        </header>
-
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
-            <div class="glass p-5 border-l-4 border-blue-500">
-                <p class="text-[10px] uppercase opacity-50">Total Orders</p>
-                <h3 id="statTotalOrders" class="text-2xl font-bold">0</h3>
-            </div>
-            <div class="glass p-5 border-l-4 border-green-500">
-                <p class="text-[10px] uppercase opacity-50">Total Sales</p>
-                <h3 id="statTotalSales" class="text-2xl font-bold">৳0</h3>
-            </div>
-            <div class="glass p-5 border-l-4 border-purple-500">
-                <p class="text-[10px] uppercase opacity-50">Today Income</p>
-                <h3 id="statTodayIncome" class="text-2xl font-bold">৳0</h3>
-            </div>
-            <div class="glass p-5 border-l-4 border-orange-500">
-                <p class="text-[10px] uppercase opacity-50">Products</p>
-                <h3 id="statTotalProducts" class="text-2xl font-bold">0</h3>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-10">
-            <div onclick="showSection('incomeSection')" class="glass p-6 section-card text-center">📊 সেলস রিপোর্ট</div>
-            <div onclick="showSection('productSection')" class="glass p-6 section-card text-center">📦 প্রোডাক্ট ম্যানেজ</div>
-            <div onclick="showSection('bannerSection')" class="glass p-6 section-card text-center">🖼️ ব্যানার আপডেট</div>
-            <div onclick="showSection('catSection')" class="glass p-6 section-card text-center">📁 ক্যাটাগরি</div>
-        </div>
-
-        <hr class="opacity-10 mb-10">
-
-        <div id="incomeSection" class="hidden-section glass p-6">
-            <h2 class="text-xl font-bold mb-6 text-blue-400 flex items-center gap-2"><span>📊</span> বিস্তারিত রিপোর্ট</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="space-y-4">
-                    <div class="flex justify-between p-4 bg-white/5 rounded-xl"><span>আজকের অর্ডার:</span> <b id="repTodayOrders">0</b></div>
-                    <div class="flex justify-between p-4 bg-white/5 rounded-xl"><span>আজকের ইনকাম:</span> <b id="repTodayIncome">৳0</b></div>
-                    <div class="flex justify-between p-4 bg-white/5 rounded-xl"><span>গত ৭ দিন (অর্ডার):</span> <b id="rep7DayOrders">0</b></div>
-                    <div class="flex justify-between p-4 bg-white/5 rounded-xl"><span>গত ৭ দিন (ইনকাম):</span> <b id="rep7DayIncome">৳0</b></div>
+                <div class="p-6 flex items-center gap-3 border-b border-white/5">
+                    <img src="https://i.ibb.co.com/GvdnCgqr/file-00000000518471faaeda9a603c264fec.png" class="w-10 h-10 rounded-lg">
+                    <div>
+                        <h1 class="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-400">SONA-MONI</h1>
+                        <p class="text-[10px] text-slate-400 uppercase tracking-wider">Admin Panel</p>
+                    </div>
                 </div>
-                <div class="space-y-4">
-                    <div class="flex justify-between p-4 bg-white/5 rounded-xl"><span>এই মাসে (অর্ডার):</span> <b id="repMonthOrders">0</b></div>
-                    <div class="flex justify-between p-4 bg-white/5 rounded-xl"><span>এই মাসে (ইনকাম):</span> <b id="repMonthIncome">৳0</b></div>
-                    <div class="flex justify-between p-4 bg-blue-600/20 rounded-xl"><span>সর্বমোট সেল:</span> <b id="repTotalSales">৳0</b></div>
+
+                <div class="flex flex-col mt-6 space-y-1">
+                    <div onclick="showSection('dashboardSection', this)" class="nav-item active px-6 py-3 text-slate-300 font-medium"><i class="fas fa-chart-pie w-6"></i> ড্যাশবোর্ড</div>
+                    <div onclick="showSection('incomeSection', this)" class="nav-item px-6 py-3 text-slate-300 font-medium"><i class="fas fa-wallet w-6"></i> সেলস রিপোর্ট</div>
+                    <div onclick="showSection('productSection', this)" class="nav-item px-6 py-3 text-slate-300 font-medium"><i class="fas fa-box-open w-6"></i> প্রোডাক্টস</div>
+                    <div onclick="showSection('bannerSection', this)" class="nav-item px-6 py-3 text-slate-300 font-medium"><i class="fas fa-images w-6"></i> ব্যানার</div>
+                    <div onclick="showSection('catSection', this)" class="nav-item px-6 py-3 text-slate-300 font-medium"><i class="fas fa-tags w-6"></i> ক্যাটাগরি</div>
                 </div>
             </div>
-        </div>
+            
+            <div class="p-6 border-t border-white/5">
+                <button onclick="location.reload()" class="w-full flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 py-2.5 rounded-lg transition-colors text-sm font-medium">
+                    <i class="fas fa-sign-out-alt"></i> লগআউট
+                </button>
+            </div>
+        </aside>
 
-        <div id="productSection" class="hidden-section">
-            <div class="glass p-6 mb-6">
-                <h2 class="font-bold mb-4">অ্যাড/এডিট প্রোডাক্ট</h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <input type="text" id="pName" placeholder="Product Name" class="input-box p-3 rounded-lg outline-none">
-                    <select id="pCat" class="input-box p-3 rounded-lg outline-none"><option value="">ক্যাটাগরি সিলেক্ট করুন</option></select>
-                    <input type="text" id="pImg" placeholder="Image URL" class="input-box p-3 rounded-lg outline-none">
-                    <input type="number" id="pPrice" placeholder="Selling Price" class="input-box p-3 rounded-lg outline-none">
-                    <input type="number" id="pOldPrice" placeholder="Old Price (Optional)" class="input-box p-3 rounded-lg outline-none">
-                    <button onclick="saveProduct()" class="bg-green-600 font-bold rounded-lg py-3">সেভ প্রোডাক্ট</button>
+        <!-- Main Content Area -->
+        <main class="flex-1 overflow-y-auto p-6 md:p-10 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]">
+            
+            <header class="flex justify-between items-center mb-8">
+                <h2 id="pageTitle" class="text-2xl font-bold">ড্যাশবোর্ড ওভারভিউ</h2>
+                <div class="flex items-center gap-3">
+                    <span class="text-sm text-slate-400"><i class="far fa-clock"></i> <span id="currentDate"></span></span>
+                    <div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 border border-blue-500/30">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                </div>
+            </header>
+
+            <!-- DASHBOARD SECTION -->
+            <div id="dashboardSection" class="active-section space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Stat Card 1 -->
+                    <div class="glass-panel p-6 relative overflow-hidden group">
+                        <div class="absolute -right-6 -top-6 text-blue-500/10 group-hover:scale-110 transition-transform"><i class="fas fa-shopping-cart text-8xl"></i></div>
+                        <p class="text-slate-400 text-sm font-medium mb-1">মোট অর্ডার</p>
+                        <h3 id="statTotalOrders" class="text-3xl font-bold text-white">0</h3>
+                        <p class="text-xs text-green-400 mt-2"><i class="fas fa-arrow-up"></i> লাইভ আপডেট</p>
+                    </div>
+                    <!-- Stat Card 2 -->
+                    <div class="glass-panel p-6 relative overflow-hidden group">
+                        <div class="absolute -right-6 -top-6 text-green-500/10 group-hover:scale-110 transition-transform"><i class="fas fa-money-bill-wave text-8xl"></i></div>
+                        <p class="text-slate-400 text-sm font-medium mb-1">সর্বমোট সেলস</p>
+                        <h3 id="statTotalSales" class="text-3xl font-bold text-green-400">৳0</h3>
+                    </div>
+                    <!-- Stat Card 3 -->
+                    <div class="glass-panel p-6 relative overflow-hidden group">
+                        <div class="absolute -right-6 -top-6 text-purple-500/10 group-hover:scale-110 transition-transform"><i class="fas fa-chart-line text-8xl"></i></div>
+                        <p class="text-slate-400 text-sm font-medium mb-1">আজকের ইনকাম</p>
+                        <h3 id="statTodayIncome" class="text-3xl font-bold text-purple-400">৳0</h3>
+                    </div>
+                    <!-- Stat Card 4 -->
+                    <div class="glass-panel p-6 relative overflow-hidden group">
+                        <div class="absolute -right-6 -top-6 text-orange-500/10 group-hover:scale-110 transition-transform"><i class="fas fa-box text-8xl"></i></div>
+                        <p class="text-slate-400 text-sm font-medium mb-1">মোট প্রোডাক্ট</p>
+                        <h3 id="statTotalProducts" class="text-3xl font-bold text-orange-400">0</h3>
+                    </div>
                 </div>
             </div>
-            <div class="glass overflow-x-auto">
-                <table class="w-full text-left">
-                    <thead class="bg-blue-600/10"><tr><th class="p-4">Product</th><th class="p-4">Category</th><th class="p-4">Price</th><th class="p-4">Action</th></tr></thead>
-                    <tbody id="productTable"></tbody>
-                </table>
-            </div>
-        </div>
 
-        <div id="bannerSection" class="hidden-section glass p-6">
-            <h2 class="font-bold mb-4">ব্যানার ম্যানেজমেন্ট</h2>
-            <div class="flex gap-4 mb-6">
-                <input type="text" id="bannerUrl" placeholder="নতুন ব্যানার ইমেজ লিঙ্ক (Direct URL)" class="flex-1 input-box p-3 rounded-lg outline-none">
-                <button onclick="addBanner()" class="bg-blue-600 px-6 rounded-lg font-bold">Add</button>
+            <!-- INCOME SECTION -->
+            <div id="incomeSection" class="hidden-section">
+                <div class="glass-panel p-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="space-y-4">
+                            <h3 class="text-lg font-semibold text-blue-400 border-b border-white/10 pb-2 mb-4"><i class="fas fa-calendar-day"></i> দৈনিক ও সাপ্তাহিক</h3>
+                            <div class="flex justify-between items-center p-4 bg-slate-800/50 rounded-xl border border-white/5">
+                                <span class="text-slate-300">আজকের অর্ডার:</span> <b id="repTodayOrders" class="text-xl">0</b>
+                            </div>
+                            <div class="flex justify-between items-center p-4 bg-slate-800/50 rounded-xl border border-white/5">
+                                <span class="text-slate-300">আজকের ইনকাম:</span> <b id="repTodayIncome" class="text-xl text-green-400">৳0</b>
+                            </div>
+                            <div class="flex justify-between items-center p-4 bg-slate-800/50 rounded-xl border border-white/5">
+                                <span class="text-slate-300">গত ৭ দিন (অর্ডার):</span> <b id="rep7DayOrders" class="text-xl">0</b>
+                            </div>
+                            <div class="flex justify-between items-center p-4 bg-slate-800/50 rounded-xl border border-white/5">
+                                <span class="text-slate-300">গত ৭ দিন (ইনকাম):</span> <b id="rep7DayIncome" class="text-xl text-green-400">৳0</b>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <h3 class="text-lg font-semibold text-purple-400 border-b border-white/10 pb-2 mb-4"><i class="fas fa-calendar-alt"></i> মাসিক ও সর্বমোট</h3>
+                            <div class="flex justify-between items-center p-4 bg-slate-800/50 rounded-xl border border-white/5">
+                                <span class="text-slate-300">এই মাসে (অর্ডার):</span> <b id="repMonthOrders" class="text-xl">0</b>
+                            </div>
+                            <div class="flex justify-between items-center p-4 bg-slate-800/50 rounded-xl border border-white/5">
+                                <span class="text-slate-300">এই মাসে (ইনকাম):</span> <b id="repMonthIncome" class="text-xl text-green-400">৳0</b>
+                            </div>
+                            <div class="flex justify-between items-center p-6 bg-gradient-to-r from-blue-600/20 to-indigo-600/20 rounded-xl border border-blue-500/30 mt-4">
+                                <span class="text-lg font-bold">সর্বমোট সেল:</span> <b id="repTotalSales" class="text-3xl text-blue-400">৳0</b>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div id="bannerList" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
-        </div>
 
-        <div id="catSection" class="hidden-section glass p-6">
-            <h2 class="font-bold mb-4">ক্যাটাগরি লিস্ট</h2>
-            <div class="flex gap-4 mb-6">
-                <input type="text" id="newCat" placeholder="নতুন ক্যাটাগরি নাম" class="flex-1 input-box p-3 rounded-lg outline-none">
-                <button onclick="addCategory()" class="bg-purple-600 px-6 rounded-lg font-bold">Create</button>
+            <!-- PRODUCT SECTION -->
+            <div id="productSection" class="hidden-section">
+                <div class="glass-panel p-6 mb-8 border-t-4 border-t-blue-500">
+                    <h2 class="font-bold mb-4 flex items-center gap-2"><i class="fas fa-plus-circle text-blue-400"></i> নতুন প্রোডাক্ট যুক্ত করুন</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+                        <div class="lg:col-span-2">
+                            <label class="text-xs text-slate-400 mb-1 block">Product Name</label>
+                            <input type="text" id="pName" placeholder="প্রোডাক্টের নাম" class="w-full input-premium p-3 rounded-lg outline-none">
+                        </div>
+                        <div>
+                            <label class="text-xs text-slate-400 mb-1 block">Category</label>
+                            <select id="pCat" class="w-full input-premium p-3 rounded-lg outline-none cursor-pointer"><option value="">সিলেক্ট করুন</option></select>
+                        </div>
+                        <div class="lg:col-span-2">
+                            <label class="text-xs text-slate-400 mb-1 block">Image URL</label>
+                            <input type="text" id="pImg" placeholder="https://..." class="w-full input-premium p-3 rounded-lg outline-none">
+                        </div>
+                        <div>
+                            <label class="text-xs text-slate-400 mb-1 block">Price (৳)</label>
+                            <input type="number" id="pPrice" placeholder="বর্তমান দাম" class="w-full input-premium p-3 rounded-lg outline-none">
+                        </div>
+                        <div>
+                            <label class="text-xs text-slate-400 mb-1 block">Old Price (৳)</label>
+                            <input type="number" id="pOldPrice" placeholder="আগের দাম (অপশনাল)" class="w-full input-premium p-3 rounded-lg outline-none">
+                        </div>
+                        <div class="lg:col-span-3">
+                            <button onclick="saveProduct()" class="w-full bg-blue-600 hover:bg-blue-500 font-bold rounded-lg py-3 transition-colors">
+                                <i class="fas fa-save mr-1"></i> সেভ প্রোডাক্ট
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="glass-panel overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="bg-slate-800 border-b border-white/10">
+                                <tr>
+                                    <th class="p-4 font-semibold text-slate-300">Image & Name</th>
+                                    <th class="p-4 font-semibold text-slate-300">Category</th>
+                                    <th class="p-4 font-semibold text-slate-300">Price</th>
+                                    <th class="p-4 font-semibold text-slate-300 text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="productTable" class="divide-y divide-white/5">
+                                <!-- Products will load here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
-            <div id="catList" class="flex flex-wrap gap-3"></div>
-        </div>
 
+            <!-- BANNER SECTION -->
+            <div id="bannerSection" class="hidden-section">
+                <div class="glass-panel p-6 mb-8">
+                    <h2 class="font-bold mb-4"><i class="fas fa-image text-purple-400 mr-2"></i> নতুন ব্যানার যুক্ত করুন</h2>
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <input type="text" id="bannerUrl" placeholder="ব্যানার ইমেজের ডিরেক্ট লিঙ্ক দিন (URL)" class="flex-1 input-premium p-3 rounded-lg outline-none">
+                        <button onclick="addBanner()" class="bg-purple-600 hover:bg-purple-500 px-8 py-3 rounded-lg font-bold transition-colors shadow-lg shadow-purple-500/20">
+                            <i class="fas fa-upload mr-2"></i> আপলোড
+                        </button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="bannerList">
+                    <!-- Banners will load here -->
+                </div>
+            </div>
+
+            <!-- CATEGORY SECTION -->
+            <div id="catSection" class="hidden-section">
+                <div class="glass-panel p-6 mb-8 lg:w-1/2">
+                    <h2 class="font-bold mb-4"><i class="fas fa-folder-plus text-orange-400 mr-2"></i> নতুন ক্যাটাগরি</h2>
+                    <div class="flex gap-4">
+                        <input type="text" id="newCat" placeholder="ক্যাটাগরির নাম" class="flex-1 input-premium p-3 rounded-lg outline-none">
+                        <button onclick="addCategory()" class="bg-orange-600 hover:bg-orange-500 px-6 py-3 rounded-lg font-bold transition-colors">
+                            তৈরি করুন
+                        </button>
+                    </div>
+                </div>
+                <div class="glass-panel p-6">
+                    <h3 class="text-sm text-slate-400 mb-4 uppercase tracking-wider">বিদ্যমান ক্যাটাগরি সমূহ</h3>
+                    <div id="catList" class="flex flex-wrap gap-3">
+                        <!-- Categories will load here -->
+                    </div>
+                </div>
+            </div>
+
+        </main>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
+        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyDo1jmjdEne0Vdx7i0Ospot38wLv9Zz4oo",
             authDomain: "sonamoni-b3c3d.firebaseapp.com",
@@ -139,34 +306,76 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // --- Helper: Toast Notification ---
+        window.showToast = (message, type = 'success') => {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = message;
+            
+            if(type === 'error') {
+                toast.classList.add('error');
+                toast.innerHTML = `<i class="fas fa-exclamation-circle mr-2"></i><span id="toast-msg">${message}</span>`;
+            } else {
+                toast.classList.remove('error');
+                toast.innerHTML = `<i class="fas fa-check-circle mr-2"></i><span id="toast-msg">${message}</span>`;
+            }
+
+            toast.classList.add('show');
+            setTimeout(() => { toast.classList.remove('show'); }, 3000);
+        };
+
+        // --- Set Date ---
+        document.getElementById('currentDate').innerText = new Date().toLocaleDateString('bn-BD', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
         // --- Auth ---
         window.checkLogin = () => {
-            if(document.getElementById('adminPass').value === '7324') {
-                document.getElementById('loginPage').style.display = 'none';
-                document.getElementById('mainDashboard').classList.remove('hidden');
-                loadStats();
-            } else { alert('ভুল পাসওয়ার্ড!'); }
+            const btn = event.currentTarget;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking...';
+            
+            setTimeout(() => {
+                if(document.getElementById('adminPass').value === '7324') {
+                    document.getElementById('loginPage').style.display = 'none';
+                    document.getElementById('mainDashboard').classList.remove('hidden');
+                    window.showToast("লগইন সফল হয়েছে!");
+                    loadStats();
+                } else { 
+                    window.showToast("ভুল পাসওয়ার্ড!", "error");
+                    btn.innerHTML = 'লগইন করুন <i class="fas fa-arrow-right ml-2"></i>';
+                }
+            }, 800);
         };
 
         // --- Navigation ---
-        window.showSection = (id) => {
-            document.querySelectorAll('.hidden-section').forEach(s => s.classList.remove('active-section'));
+        window.showSection = (id, el) => {
+            // Update active content
+            document.querySelectorAll('.hidden-section, .active-section').forEach(s => {
+                s.classList.remove('active-section');
+                s.classList.add('hidden-section');
+            });
+            document.getElementById(id).classList.remove('hidden-section');
             document.getElementById(id).classList.add('active-section');
+            
+            // Update title
+            const titles = {
+                'dashboardSection': 'ড্যাশবোর্ড ওভারভিউ',
+                'incomeSection': 'সেলস ও ইনকাম রিপোর্ট',
+                'productSection': 'প্রোডাক্ট ম্যানেজমেন্ট',
+                'bannerSection': 'ব্যানার ম্যানেজমেন্ট',
+                'catSection': 'ক্যাটাগরি ম্যানেজমেন্ট'
+            };
+            document.getElementById('pageTitle').innerText = titles[id];
+
+            // Update active menu style
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+            el.classList.add('active');
         };
 
         // --- 1. Reports & Stats Logic ---
         function loadStats() {
             onSnapshot(collection(db, "orders"), (snap) => {
-                let totalIncome = 0;
-                let todayIncome = 0;
-                let last7DaysIncome = 0;
-                let lastMonthIncome = 0;
-                
-                let totalOrders = snap.size;
-                let todayOrders = 0;
-                let last7DaysOrders = 0;
-                let lastMonthOrders = 0;
+                let totalIncome = 0; let todayIncome = 0; let last7DaysIncome = 0; let lastMonthIncome = 0;
+                let todayOrders = 0; let last7DaysOrders = 0; let lastMonthOrders = 0;
 
+                const totalOrders = snap.size;
                 const now = new Date();
                 const todayStr = now.toLocaleDateString();
                 const sevenDaysAgo = new Date(now.setDate(now.getDate() - 7));
@@ -175,25 +384,17 @@
                 snap.forEach(d => {
                     const o = d.data();
                     const orderPrice = Number(o.price) || 0;
-                    const orderDate = o.timestamp ? new Date(o.timestamp.seconds * 1000) : new Date();
+                    // Handle Firestore Timestamp or standard JS Date string
+                    const orderDate = o.timestamp?.seconds ? new Date(o.timestamp.seconds * 1000) : new Date(o.timestamp || Date.now());
 
                     totalIncome += orderPrice;
 
-                    if(orderDate.toLocaleDateString() === todayStr) {
-                        todayIncome += orderPrice;
-                        todayOrders++;
-                    }
-                    if(orderDate > sevenDaysAgo) {
-                        last7DaysIncome += orderPrice;
-                        last7DaysOrders++;
-                    }
-                    if(orderDate > lastMonth) {
-                        lastMonthIncome += orderPrice;
-                        lastMonthOrders++;
-                    }
+                    if(orderDate.toLocaleDateString() === todayStr) { todayIncome += orderPrice; todayOrders++; }
+                    if(orderDate > sevenDaysAgo) { last7DaysIncome += orderPrice; last7DaysOrders++; }
+                    if(orderDate > lastMonth) { lastMonthIncome += orderPrice; lastMonthOrders++; }
                 });
 
-                // Update UI
+                // Animate Numbers (Simple Implementation)
                 document.getElementById('statTotalOrders').innerText = totalOrders;
                 document.getElementById('statTotalSales').innerText = "৳" + totalIncome;
                 document.getElementById('statTodayIncome').innerText = "৳" + todayIncome;
@@ -213,13 +414,31 @@
             const table = document.getElementById('productTable');
             table.innerHTML = '';
             document.getElementById('statTotalProducts').innerText = snap.size;
+            
+            if(snap.empty) {
+                table.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-slate-500">কোনো প্রোডাক্ট পাওয়া যায়নি</td></tr>`;
+                return;
+            }
+
             snap.forEach(d => {
                 const p = d.data();
-                table.innerHTML += `<tr class="border-b border-white/5">
-                    <td class="p-4"><img src="${p.img}" class="w-8 h-8 rounded inline mr-2">${p.name}</td>
-                    <td class="p-4"><span class="text-xs bg-slate-700 px-2 py-1 rounded">${p.category}</span></td>
-                    <td class="p-4">৳${p.price}</td>
-                    <td class="p-4"><button onclick="deleteDoc(doc(db, 'products', '${d.id}'))" class="text-red-400">Delete</button></td>
+                table.innerHTML += `
+                <tr class="hover:bg-white/5 transition-colors group">
+                    <td class="p-4">
+                        <div class="flex items-center gap-3">
+                            <img src="${p.img || 'https://via.placeholder.com/50'}" class="w-12 h-12 rounded-lg object-cover border border-white/10">
+                            <div>
+                                <p class="font-medium text-white">${p.name}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="p-4"><span class="text-xs font-medium bg-blue-500/10 text-blue-400 px-3 py-1.5 rounded-full border border-blue-500/20">${p.category}</span></td>
+                    <td class="p-4 font-bold text-green-400">৳${p.price} <span class="text-xs text-slate-500 line-through ml-1">${p.oldPrice ? '৳'+p.oldPrice : ''}</span></td>
+                    <td class="p-4 text-right">
+                        <button onclick="deleteProduct('${d.id}')" class="w-8 h-8 rounded-full bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-colors">
+                            <i class="fas fa-trash-alt text-sm"></i>
+                        </button>
+                    </td>
                 </tr>`;
             });
         });
@@ -230,11 +449,26 @@
                 category: document.getElementById('pCat').value,
                 img: document.getElementById('pImg').value,
                 price: Number(document.getElementById('pPrice').value),
-                oldPrice: Number(document.getElementById('pOldPrice').value) || 0
+                oldPrice: Number(document.getElementById('pOldPrice').value) || 0,
+                timestamp: new Date().toISOString()
             };
-            if(!data.name || !data.category) return alert("Fill data");
-            await addDoc(collection(db, "products"), data);
-            alert("Product Added!");
+            if(!data.name || !data.category || !data.price) return window.showToast("দয়া করে নাম, ক্যাটাগরি এবং দাম দিন", "error");
+            
+            try {
+                await addDoc(collection(db, "products"), data);
+                window.showToast("প্রোডাক্ট সফলভাবে যুক্ত হয়েছে!");
+                document.getElementById('pName').value = '';
+                document.getElementById('pImg').value = '';
+                document.getElementById('pPrice').value = '';
+                document.getElementById('pOldPrice').value = '';
+            } catch(e) { window.showToast("Error adding product!", "error"); }
+        };
+
+        window.deleteProduct = async (id) => {
+            if(confirm("আপনি কি নিশ্চিত যে এটি ডিলিট করতে চান?")) {
+                await deleteDoc(doc(db, "products", id));
+                window.showToast("প্রোডাক্ট ডিলিট হয়েছে!", "error");
+            }
         };
 
         // --- 3. Banner Logic ---
@@ -242,18 +476,29 @@
             const list = document.getElementById('bannerList');
             list.innerHTML = '';
             snap.forEach(d => {
-                list.innerHTML += `<div class="relative group">
-                    <img src="${d.data().url}" class="h-24 w-full object-cover rounded-lg">
-                    <button onclick="deleteDoc(doc(db, 'banners', '${d.id}'))" class="absolute top-1 right-1 bg-red-600 p-1 rounded text-[10px]">Delete</button>
+                list.innerHTML += `
+                <div class="glass-panel p-2 relative group overflow-hidden">
+                    <img src="${d.data().url}" class="h-40 w-full object-cover rounded-lg transform group-hover:scale-105 transition-transform duration-500">
+                    <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg">
+                        <button onclick="deleteBanner('${d.id}')" class="bg-red-500 text-white px-4 py-2 rounded-lg font-bold shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all">
+                            <i class="fas fa-trash mr-1"></i> ডিলিট
+                        </button>
+                    </div>
                 </div>`;
             });
         });
 
         window.addBanner = async () => {
             const url = document.getElementById('bannerUrl').value;
-            if(!url) return;
+            if(!url) return window.showToast("ইমেজ লিঙ্ক দিন", "error");
             await addDoc(collection(db, "banners"), { url });
+            window.showToast("ব্যানার যুক্ত হয়েছে!");
             document.getElementById('bannerUrl').value = '';
+        };
+
+        window.deleteBanner = async (id) => {
+            await deleteDoc(doc(db, "banners", id));
+            window.showToast("ব্যানার মুছে ফেলা হয়েছে!", "error");
         };
 
         // --- 4. Category Logic ---
@@ -261,19 +506,33 @@
             const list = document.getElementById('catList');
             const select = document.getElementById('pCat');
             list.innerHTML = '';
-            select.innerHTML = '<option value="">ক্যাটাগরি সিলেক্ট করুন</option>';
+            select.innerHTML = '<option value="">সিলেক্ট করুন</option>';
             snap.forEach(d => {
                 const name = d.data().name;
-                list.innerHTML += `<span class="bg-white/10 px-4 py-2 rounded-xl flex items-center gap-2">${name} <button onclick="deleteDoc(doc(db, 'categories', '${d.id}'))" class="text-red-400">×</button></span>`;
-                select.innerHTML += `<option value="${name}">${name}</option>`;
+                list.innerHTML += `
+                <div class="bg-slate-800 border border-slate-700 px-4 py-2 rounded-xl flex items-center gap-3 shadow-sm">
+                    <span class="text-slate-200">${name}</span>
+                    <button onclick="deleteCategory('${d.id}')" class="w-6 h-6 rounded-full bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white flex items-center justify-center transition-colors">
+                        <i class="fas fa-times text-xs"></i>
+                    </button>
+                </div>`;
+                select.innerHTML += `<option value="${name}" class="bg-slate-800 text-white">${name}</option>`;
             });
         });
 
         window.addCategory = async () => {
             const name = document.getElementById('newCat').value;
-            if(!name) return;
+            if(!name) return window.showToast("ক্যাটাগরির নাম দিন", "error");
             await addDoc(collection(db, "categories"), { name });
+            window.showToast("ক্যাটাগরি যুক্ত হয়েছে!");
             document.getElementById('newCat').value = '';
+        };
+
+        window.deleteCategory = async (id) => {
+            if(confirm("এই ক্যাটাগরি ডিলিট করবেন?")) {
+                await deleteDoc(doc(db, "categories", id));
+                window.showToast("ক্যাটাগরি ডিলিট করা হয়েছে!", "error");
+            }
         };
 
     </script>
